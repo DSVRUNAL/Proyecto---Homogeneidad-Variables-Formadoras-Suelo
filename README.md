@@ -54,3 +54,26 @@ La metodología para el análisis de homogeneidad sigue los siguientes pasos:
     * **65-85% de variables clusterizadas:** Zona homogénea con el 65% al 85% de las variables clusterizadas.
     * **85-95% de variables clusterizadas:** Zona homogénea con el 85% al 95% de las variables clusterizadas.
     * **>95% de variables clusterizadas:** Zona homogénea con más del 95% de variables clusterizadas.
+
+## Funciones implementadas
+1. En *Data_preparation.ipynb* se llama la función carga_shp_raster_proj(ruta_base_shp, nombres_shp, ruta_base_ras, nombres_raster, epsg_destino=9377 )
+    Esta función tiene como argumentos de entrada:
+   - ruta_base_shp: una cadena de texto donde se especifique la ruta de los shapes. Ej: /notebooks/Insumos_Proyecto_Clase/
+   - nombres_shp : un diccionario donde se guarden los nombres de los archivos shp. Ej: nombres_shp = {
+    "geom": "Geomorfologia.shp",
+    "geol": "Geologia.shp",
+    "clima": "Clima_IGAC.shp",
+    "limBuf": "Limite_Buff_500.shp"]
+   - ruta_base_ras: una cadena de texto donde se especifique la ruta de los raster. Ej: /notebooks/Insumos_Proyecto_Clase/
+   - nombres_raster: un diccionario donde se guarden los nombres de los raster. Ej: nombres_raster = {
+    "sentinel2": "Sentinel2.tif",
+    "dem": "Dem_Cortado_Buff.tif"}
+   - epsg_destino: se especifica el EPSG al que se requiere proyectar todos los insumos cargados, tanto shape como raster.
+Esta funcion se encarga de entrar en cada ruta especficada, buscar los archivos con su nombre y extensión. Para todos los shapes reproyecta a EPSG 9326 e igualmente para todos los rasters. 
+
+2. En *Visualization.ipynb* se llaman dos funciones: **visualizar_dem(ruta_dem, cmap='terrain')** y **visualizar_multibanda(ruta_raster, cmap='viridis')**
+Estas dos funciones se encargan de generar salidas gráficas de los rasters cargados.
+*visualizar_dem* funciona para rasters de 1 banda y tiene como argumento 1 *ruta_dem* donde se debe indicar como cadena de texto
+la ruta del raster, ej: "/notebooks/Insumos_Proyecto_Clase/Dem_Cortado_Buff_Reproyectado.tif". Como argumento 2 *cmap* y se establece por defecto con *terrain* que puede ser cambiado por cualquier otra rampa de colores.
+
+*visualizar_multibanda* funciona para cualquier raster multibanda. Los argumentos de entrada son similares: el primer argumento es *ruta_raster*, en él se especifica la ruta del raster, ej: "/notebooks/Insumos_Proyecto_Clase/Sentinel2_Reproyectado.tif". El segundo argumento es *cmap* y se establece por defecto con *viridis* que puede ser cambiado por cualquier otra rampa de colores.
