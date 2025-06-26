@@ -2,7 +2,7 @@
 
 ## Descripción del Proyecto
 
-El presente proyecto tiene como objetivo generar un mapa de homogeneidad de las variables formadoras del suelo utilizando imágenes de sensores remotos. El análisis se realiza para cada forma de la tierra interpretada en la cuenca de la quebrada Curití - Santander, con el fin de identificar vacíos de conocimiento en la caracterización del suelo.
+El presente proyecto tiene como objetivo generar un mapa de homogeneidad de las variables formadoras del suelo utilizando imágenes de sensores remotos y cartografía temática. El análisis se realiza para cada forma de la tierra interpretada en la cuenca de la quebrada Curití - Santander, con el fin de identificar vacíos de conocimiento en la caracterización del suelo.
 
 ## Objetivo Principal
 
