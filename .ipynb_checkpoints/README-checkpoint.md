@@ -71,9 +71,8 @@ La metodología para el análisis de homogeneidad sigue los siguientes pasos:
    - epsg_destino: se especifica el EPSG al que se requiere proyectar todos los insumos cargados, tanto shape como raster.
 Esta funcion se encarga de entrar en cada ruta especficada, buscar los archivos con su nombre y extensión. Para todos los shapes reproyecta a EPSG 9326 e igualmente para todos los rasters. 
 
-2. En *Visualization.ipynb* se llaman dos funciones: **visualizar_dem(ruta_dem, cmap='terrain')** y **visualizar_multibanda(ruta_raster, cmap='viridis')**
+2. En *Visualization.ipynb* se llaman dos funciones: **visualizar_dem(ruta_dem, cmap='terrain')** y **visualizar_multibanda(ruta_raster, cmap='viridis')**.
 Estas dos funciones se encargan de generar salidas gráficas de los rasters cargados.
-*visualizar_dem* funciona para rasters de 1 banda y tiene como argumento 1 *ruta_dem* donde se debe indicar como cadena de texto
-la ruta del raster, ej: "/notebooks/Insumos_Proyecto_Clase/Dem_Cortado_Buff_Reproyectado.tif". Como argumento 2 *cmap* y se establece por defecto con *terrain* que puede ser cambiado por cualquier otra rampa de colores.
+    - *visualizar_dem* funciona para rasters de 1 banda y tiene como argumento 1 *ruta_dem* donde se debe indicar como cadena de texto la ruta del raster, ej: "/notebooks/Insumos_Proyecto_Clase/Dem_Cortado_Buff_Reproyectado.tif". Como argumento 2 *cmap* y se establece por defecto con *terrain* que puede ser cambiado por cualquier otra rampa de     colores.
 
-*visualizar_multibanda* funciona para cualquier raster multibanda. Los argumentos de entrada son similares: el primer argumento es *ruta_raster*, en él se especifica la ruta del raster, ej: "/notebooks/Insumos_Proyecto_Clase/Sentinel2_Reproyectado.tif". El segundo argumento es *cmap* y se establece por defecto con *viridis* que puede ser cambiado por cualquier otra rampa de colores.
+- *visualizar_multibanda* funciona para cualquier raster multibanda. Los argumentos de entrada son similares: el primer argumento es *ruta_raster*, en él se especifica la ruta del raster, ej: "/notebooks/Insumos_Proyecto_Clase/Sentinel2_Reproyectado.tif". El segundo argumento es *cmap* y se establece por defecto con *viridis* que puede ser cambiado por cualquier otra rampa de colores.
