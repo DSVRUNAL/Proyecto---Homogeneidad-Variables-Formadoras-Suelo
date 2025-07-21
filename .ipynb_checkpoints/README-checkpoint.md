@@ -1,78 +1,190 @@
+
 # Análisis de Homogeneidad en Variables Formadoras del Suelo mediante Sensores Remotos
 
-## Descripción del Proyecto
+## Descripción
 
-El presente proyecto tiene como objetivo generar un mapa de homogeneidad de las variables formadoras del suelo utilizando imágenes de sensores remotos y cartografía temática. El análisis se realiza para cada forma de la tierra interpretada en la cuenca de la quebrada Curití - Santander, con el fin de identificar vacíos de conocimiento en la caracterización del suelo.
+Este repositorio contiene el código y los datos necesarios para generar un **mapa de homogeneidad de las variables formadoras del suelo** utilizando imágenes de sensores remotos y cartografía temática en la cuenca de la quebrada Curití - Santander.
 
-## Objetivo Principal
+El proyecto identifica zonas homogéneas y heterogéneas dentro de cada forma del terreno, empleando índices espectrales, variables topográficas y técnicas de clasificación no supervisada.
 
-* Generar un mapa de homogeneidad de las variables formadoras del suelo mediante imágenes de sensores remotos para cada forma de la tierra interpretada en la cuenca de la quebrada Curití - Santander.
+Repositorio oficial: [DSVRUNAL/Proyecto---Homogeneidad-Variables-Formadoras-Suelo](https://github.com/DSVRUNAL/Proyecto---Homogeneidad-Variables-Formadoras-Suelo)
 
-## Fuentes de Información
+## Estructura del Proyecto
 
-Las siguientes fuentes de datos se utilizan en este proyecto:
+```
+├── notebooks/
+│   ├── Analysis.ipynb              # Clasificación K-means y análisis de resultados
+│   ├── Data_preparation.ipynb      # Carga y preprocesamiento de datos
+│   └── Visualization.ipynb         # Visualización de resultados
+│
+│   └── results/                     # Resultados gráficos generados
+│       ├── Geoformas_Clasificadas.jpg
+│       ├── Visualizacion_Raster_1Banda.jpg
+│       └── Visualizacion_Raster_Multibanda.jpg
+│
+├── src/
+│   ├── clip_rasters.py              # Recorte de capas raster
+│   ├── clustered_stack.py           # Generación de modelos de clustering por geoforma
+│   ├── data_preprocessing.py        # Conversión de raster a dataframe y filtro por correlación
+│   ├── raster_processing.py         # Rasterización y resampleo de capas vectoriales
+│   ├── symbol_processing.py         # Procesamiento y análisis de símbolos por geoforma
+│   └── visualization_tools.py       # Funciones de visualización de raster
+│
+└── README.md
+```
 
-* **Mapa Geomorfología:** A nivel de forma de la tierra.
-* **Imágenes Sentinel 2:** Se utilizarán bandas SWIR, NIR, R, G, B.
-    * **Índices Derivados:**
-        * NDVI (Normalized Difference Vegetation Index).
-        * EVI (Enhanced Vegetation Index).
-        * SAVI (Soil Adjusted Vegetation Index).
-        * BSI (Bare Soil Index).
-        * SWI (Shortwave Infrared Index).
-        * NDMI (Normalized Difference Moisture Index).
-    * **Resolución:** Sentinel 2 tiene una resolución de 20m para una escala cartográfica máxima de 1:25.000 y un área mínima cartografiable de 1.5 ha.
-* **DEM - Alos Palsar 12.5m:**.
-    * Profundidad del valle.
-    * Pendiente.
-    * Curvatura del perfil respecto al plano vertical.
-    * Curvatura respecto al plano horizontal.
-    * Depresiones convergentes.
-    * Direcciones de flujo.
-    * Distancia de la red de canales.
+## Flujo de Trabajo
 
-## Metodología
+### 1. Preparación de Datos
 
-La metodología para el análisis de homogeneidad sigue los siguientes pasos:
+- Cálculo de índices espectrales en Google Earth Engine:
+  - NDVI, EVI, SAVI, BSI, NBR, NDMI, NDRGI.
+- Generación de variables topográficas en SAGA GIS:
+  - Pendiente, Aspecto, Índice de Convergencia, TWI, Profundidad del Valle.
+- Rasterización de capas temáticas (Clima, Geología, Geomorfología, Material Parental).
+- Armonización y generalización de variables a 20m de resolución.
 
-1.  **Armonización y Vectorización de Variables:** Las variables se armonizarán y vectorizarán, generalizándose a 20m y convirtiendo a centroides de píxel.
-2.  **Correlación:** Se realizará un filtro para correlaciones mayores al 90% (inversa o directa).
-3.  **Autocorrelación:** Se calculará el Índice de Morán Global, el Valor P y la puntuación Z (Z score).
-    * **Interpretación del Índice de Morán:**
-        * Si el valor P no es estadísticamente significativo, indica aleatoriedad completa y no se puede rechazar la hipótesis nula.
-        * Si P es pequeño y Z es positiva, indica autocorrelación positiva estadísticamente significativa con altos-altos y bajos-bajos valores. Se puede rechazar la hipótesis nula.
-        * Si P es pequeño y Z es negativa, indica autocorrelación negativa estadísticamente significativa con altos-bajos y bajos-altos valores. Se puede rechazar la hipótesis nula.
-4.  **Clasificación Preliminar:**.
-    * Si el Índice de Morán (IM) es diferente de cero ($IM \neq 0$).
-    * Si el Valor P es menor a 0.05 ($P < 0.05$).
-    * Si la puntuación Z está fuera del rango -1.96 a 1.96 ($Z > 1.96$ o $Z < -1.96$).
-        * Si se cumplen estas condiciones, la zona es **Heterogénea**.
-        * Si no se cumplen las condiciones, la zona es **Homogénea**.
-5.  **Análisis de Puntos Calientes:** Se ejecuta por geoforma preclasificada, generando clusters por cada variable y conteo.
-6.  **Clasificación Final de Formas del Terreno (Basado en Porcentaje de Variables Clusterizadas):**.
-    * **0-65% de variables clusterizadas:** Zona homogénea.
-    * **65-85% de variables clusterizadas:** Zona homogénea con el 65% al 85% de las variables clusterizadas.
-    * **85-95% de variables clusterizadas:** Zona homogénea con el 85% al 95% de las variables clusterizadas.
-    * **>95% de variables clusterizadas:** Zona homogénea con más del 95% de variables clusterizadas.
+### 2. Corte por Geoforma
 
-## Funciones implementadas
-1. En *Data_preparation.ipynb* se llama la función carga_shp_raster_proj(ruta_base_shp, nombres_shp, ruta_base_ras, nombres_raster, epsg_destino=9377 )
-    Esta función tiene como argumentos de entrada:
-   - ruta_base_shp: una cadena de texto donde se especifique la ruta de los shapes. Ej: /notebooks/Insumos_Proyecto_Clase/
-   - nombres_shp : un diccionario donde se guarden los nombres de los archivos shp. Ej: nombres_shp = {
-    "geom": "Geomorfologia.shp",
-    "geol": "Geologia.shp",
-    "clima": "Clima_IGAC.shp",
-    "limBuf": "Limite_Buff_500.shp"]
-   - ruta_base_ras: una cadena de texto donde se especifique la ruta de los raster. Ej: /notebooks/Insumos_Proyecto_Clase/
-   - nombres_raster: un diccionario donde se guarden los nombres de los raster. Ej: nombres_raster = {
-    "sentinel2": "Sentinel2.tif",
-    "dem": "Dem_Cortado_Buff.tif"}
-   - epsg_destino: se especifica el EPSG al que se requiere proyectar todos los insumos cargados, tanto shape como raster.
-Esta funcion se encarga de entrar en cada ruta especficada, buscar los archivos con su nombre y extensión. Para todos los shapes reproyecta a EPSG 9326 e igualmente para todos los rasters. 
+Se realiza un corte del stack de variables por cada geoforma, utilizando un iterador sobre cada símbolo del mapa geomorfológico.
 
-2. En *Visualization.ipynb* se llaman dos funciones: **visualizar_dem(ruta_dem, cmap='terrain')** y **visualizar_multibanda(ruta_raster, cmap='viridis')**.
-Estas dos funciones se encargan de generar salidas gráficas de los rasters cargados.
-    - *visualizar_dem* funciona para rasters de 1 banda y tiene como argumento 1 *ruta_dem* donde se debe indicar como cadena de texto la ruta del raster, ej: "/notebooks/Insumos_Proyecto_Clase/Dem_Cortado_Buff_Reproyectado.tif". Como argumento 2 *cmap* y se establece por defecto con *terrain* que puede ser cambiado por cualquier otra rampa de     colores.
+### 3. Clasificación con K-Means
 
-- *visualizar_multibanda* funciona para cualquier raster multibanda. Los argumentos de entrada son similares: el primer argumento es *ruta_raster*, en él se especifica la ruta del raster, ej: "/notebooks/Insumos_Proyecto_Clase/Sentinel2_Reproyectado.tif". El segundo argumento es *cmap* y se establece por defecto con *viridis* que puede ser cambiado por cualquier otra rampa de colores.
+Se aplica K-means por cada geoforma usando `Analysis.ipynb`:
+
+```python
+from src.clustered_stack import ClusteredStack
+
+modelo = ClusteredStack(raster_data)
+modelo.set_raster_stack()
+modelo.build_models(k_range=[2,3,4])
+```
+
+Se calcula:
+- Valor de K óptimo por geoforma.
+- Silhouette Score por geoforma.
+- Segmentación y almacenamiento de las métricas en un dataframe.
+
+### 4. Criterios de Homogeneidad
+
+La clasificación de homogeneidad se realiza con los siguientes criterios:
+
+| Criterio | Descripción |
+| -------- | ----------- |
+| K promedio ≥ 2 y K promedio ≤ 4 | Indica estabilidad en la segmentación |
+| Silhouette Score promedio ≥ 0.87 | Indica alta cohesión y separación entre clusters |
+
+Si ambos criterios se cumplen, la geoforma se clasifica como **homogénea**.
+
+### 5. Visualización de Resultados
+
+Se generan mapas y salidas gráficas usando `Visualization.ipynb` y las funciones de `visualization_tools.py`.
+
+Los resultados se guardan en:
+
+```
+notebooks/results/
+├── Geoformas_Clasificadas.jpg
+├── Visualizacion_Raster_1Banda.jpg
+└── Visualizacion_Raster_Multibanda.jpg
+```
+
+## Funciones Principales
+
+### src/clip_rasters.py
+
+**Función:**
+- `cortar_rasters_por_geoformas(ruta_shp, ruta_ras, nombres_shp, nombres_raster, output_dir)`
+
+**Entrada:**
+- `ruta_shp`: ruta de los shapefiles.
+- `ruta_ras`: ruta de los rasters.
+- `nombres_shp`: diccionario de shapefiles.
+- `nombres_raster`: diccionario de rasters.
+- `output_dir`: directorio de salida.
+
+**Salida:**
+- Rasters recortados por geoforma, guardados en el directorio especificado.
+
+---
+
+### src/clustered_stack.py
+
+**Clase:** `ClusteredStack`
+
+**Métodos:**
+- `set_raster_stack()`: reestructura y normaliza los datos.
+- `build_models(k_values)`: entrena modelos K-means para un rango de K.
+- `get_best_k()`: devuelve el mejor K y su Silhouette Score.
+- `show_clustered()`: visualiza los clústeres.
+- `show_inertia()`: muestra la curva del codo.
+- `show_silhouette()`: muestra el gráfico de silhouette.
+
+**Entrada:**
+- Raster stack (array 3D).
+
+**Salida:**
+- Raster de etiquetas por K, valores de K óptimo y silhouette.
+
+---
+
+### src/data_preprocessing.py
+
+**Función:**
+- `carga_shp_raster_proj(ruta_base_shp, nombres_shp, ruta_base_ras, nombres_raster, epsg_destino)`
+
+**Entrada:**
+- Rutas y nombres de shapefiles y rasters.
+
+**Salida:**
+- Diccionario con shapefiles y rasters cargados y reproyectados.
+
+---
+
+### src/raster_processing.py
+
+**Función:**
+- `rasterizacion_shapefiles(ruta_shp, ruta_ras, nombres_shp, nombres_raster, column_dict)`
+
+**Entrada:**
+- Shapefiles, rasters y columnas a rasterizar.
+
+**Salida:**
+- Rasters de clima, geología y geomorfología rasterizados y resampleados a 20m.
+
+---
+
+### src/symbol_processing.py
+
+**Función:**
+- `procesar_simbolos(ruta_shp, ruta_ras, nombres_shp)`
+
+**Entrada:**
+- Rutas de entrada y diccionario de shapefiles.
+
+**Salida:**
+- DataFrame con los resultados de K y Silhouette por banda y símbolo, incluyendo promedios.
+
+---
+
+### src/visualization_tools.py
+
+**Funciones:**
+- `visualizar_dem(ruta_dem)`: visualiza un raster DEM de una banda.
+- `visualizar_multibanda(ruta_raster)`: visualiza cada banda de un raster multibanda.
+
+**Entrada:**
+- Rutas de raster.
+
+**Salida:**
+- Gráficos con matplotlib.
+
+## Resultados
+
+- Mapas de homogeneidad por forma de la tierra.
+- Dataframe con métricas por geoforma (K promedio, Silhouette Score promedio).
+
+## Recomendaciones
+
+- La función de K-means ya está paralelizada, por lo que se recomienda ajustar el número de núcleos según la capacidad del equipo.
+- Implementar análisis por teselas si se requiere un análisis espacial más detallado.
